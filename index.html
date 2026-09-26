@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>AI Chatbot</title>
+  <style>
+    body {
+      font-family: "Segoe UI", Roboto, Arial, sans-serif;
+      background: #f0f2f5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .chat-container {
+      width: 420px;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .chat-header {
+      background: #2d89ef;
+      color: white;
+      padding: 15px;
+      text-align: center;
+      font-size: 18px;
+      font-weight: 600;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .chat-box {
+      flex: 1;
+      padding: 15px;
+      overflow-y: auto;
+      background: #fafafa;
+      display: flex;
+      flex-direction: column;
+    }
+    .message-row {
+      display: flex;
+      align-items: flex-end;
+      margin: 8px 0;
+      animation: fadeInUp 0.3s ease;
+    }
+    .message {
+      padding: 10px 15px;
+      border-radius: 18px;
+      max-width: 70%;
+      line-height: 1.4;
+      font-size: 14px;
+    }
+    .user-message {
+      background: #2d89ef;
+      color: white;
+      margin-left: auto;
+      border-bottom-right-radius: 4px;
+    }
+    .bot-message {
+      background: #e9ecef;
+      color: #333;
+      margin-right: auto;
+      border-bottom-left-radius: 4px;
+    }
+    .avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      margin: 0 8px;
+    }
+    .chat-input {
+      display: flex;
+      padding: 12px;
+      border-top: 1px solid #ddd;
+      background: #fff;
+    }
+    .chat-input input {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 20px;
+      outline: none;
+      font-size: 14px;
+    }
+    .chat-input button {
+      margin-left: 10px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 20px;
+      background: #2d89ef;
+      color: white;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .chat-input button:hover {
+      background: #1b5cb8;
+    }
+    @keyframes fadeInUp {
+      from {opacity: 0; transform: translateY(10px);}
+      to {opacity: 1; transform: translateY(0);}
+    }
+  </style>
+</head>
+<body>
+  <div class="chat-container">
+    <div class="chat-header">AI Chatbot 🤖</div>
+    <div class="chat-box" id="chat-box"></div>
+    <div class="chat-input">
+      <input id="message" placeholder="Type your query...">
+      <button onclick="sendMessage()">Send</button>
+    </div>
+  </div>
+
+  <script>
+    async function sendMessage() {
+      const msg = document.getElementById("message").value;
+      if (!msg) return;
+
+      const chatBox = document.getElementById("chat-box");
+
+      // Show user message instantly with avatar
+      const userRow = document.createElement("div");
+      userRow.className = "message-row";
+      const userMsg = document.createElement("div");
+      userMsg.className = "message user-message";
+      userMsg.innerText = msg;
+      const userAvatar = document.createElement("img");
+      userAvatar.src = "https://cdn-icons-png.flaticon.com/512/1946/1946429.png"; // user avatar
+      userAvatar.className = "avatar";
+      userRow.appendChild(userMsg);
+      userRow.appendChild(userAvatar);
+      chatBox.appendChild(userRow);
+      document.getElementById("message").value = "";
+
+      // Show instant placeholder bot reply with avatar
+      const botRow = document.createElement("div");
+      botRow.className = "message-row";
+      const botAvatar = document.createElement("img");
+      botAvatar.src = "https://cdn-icons-png.flaticon.com/512/4712/4712109.png"; // bot avatar
+      botAvatar.className = "avatar";
+      const botMsg = document.createElement("div");
+      botMsg.className = "message bot-message";
+      botMsg.innerText = "Processing...";
+      botRow.appendChild(botAvatar);
+      botRow.appendChild(botMsg);
+      chatBox.appendChild(botRow);
+      chatBox.scrollTop = chatBox.scrollHeight;
+
+      // Fetch real reply from backend
+      try {
+        const res = await fetch("http://127.0.0.1:5000/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: msg })
+        });
+        const data = await res.json();
+
+        // Replace placeholder with actual reply
+        botMsg.innerText = data.bot_response;
+      } catch (error) {
+        botMsg.innerText = "⚠️ Backend not reachable.";
+      }
+    }
+  </script>
+</body>
+</html>
